@@ -5,4 +5,4 @@ These programs compute the low-rank URU' and low rank + diagonal approximation U
 
 XP_Proj: Single projection of a matrix H on the tangent plane of a low-rank manifold.
 
-XP_Ricatti: Successive projections to track a time dependent matrix H given by the Ricatti equations. The sequence of projections are given by ODE on matrixes in this case. 
+XP_Ricatti: Successive projections to track a time dependent matrix H given by the Ricatti equations. The sequence of projections are given by ODE on a covariance matrix P. 
