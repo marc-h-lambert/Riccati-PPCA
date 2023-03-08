@@ -1,14 +1,14 @@
 ############################################################################################
-###   Companion code for the article 
+###   Companion code for the article
 ###   "Low-rank plus diagonal approximations for Riccati-like matrix differential equations"
 ###   Authors: Silvere Bonnabel, Marc Lambert and Francis Bach
-###   Code supported by Silvere Bonnabel and Marc Lambert  
+###   Code supported by Silvere Bonnabel and Marc Lambert
 #############################################################################################
 
-addpath MaToolbox;
+addpath Toolbox;
 
 '----------- Diagonal + low rank : Test of Riccati flow ------------'
-## We integrate the Riccati SDE of the error and the covariance for a simple system 
+## We integrate the Riccati SDE of the error and the covariance for a simple system
 # with A=0 and P0=URU'+s(I-UU')
 
 # Can change d or r or Cvariable or SQ
@@ -16,8 +16,8 @@ addpath MaToolbox;
 # Cvariable=0: 1D problem with fixed C
 # Cvariable=1: 2D problem with variable C
 
-d=30;
-r=5;
+d=150;
+r=10;
 
 %Simulation du système
 
@@ -31,7 +31,7 @@ N=Tf/dt;
 Cvariable=0;
 A=zeros(d,d);
 
-if Cvariable ==0;
+#if Cvariable ==0;
   # Observation matrix the same at each t
   C=zeros(d,d);
   for i=1:d-1;
@@ -40,21 +40,35 @@ if Cvariable ==0;
   C=-eye(d)+C;
   C(d,d)=1;
   C;
-endif
+#endif
 
 dq=zeros(d,1);
 for u=1:d;
-  dq(u)=rand;
+  dq(u)=0.1+1*abs(rand);
 endfor
 dq=dq;
 #dq=randn(d,1);
 #SQ=diag(1:d)/d;
 #SQ=0.1*diag(rand(d));
-Q=0.01*diag(dq);
+Q=10*0.2*diag(dq);
 #SQ=eye(d);
 #Q=0.1*SQ*SQ'; %process noise
 SQ=chol(Q);
-NN=0.2; %obs noise
+dq=zeros(d,1);
+for u=1:d;
+  dq(u)=0.1+1*abs(randn);
+endfor
+dq=dq;
+NN=2*diag(dq);
+
+Q=100*0.01*diag(dq);
+#SQ=eye(d);
+#Q=0.1*SQ*SQ'; %process noise
+SQ=chol(Q);
+NN=10*0.2; %obs noise
+
+
+
 
 
 ########## Compute Pinit
@@ -63,10 +77,12 @@ O=randn(d,r);
 UU=orth(O);
 U=UU;%;eye(d)(:,1:r); % the goal is to generate a stiefel random matrix to avoid alignment with the diagonal which would favor our methods
 RR=2*eye(r); %initial parameters for all filters
-R=RR;
-s=0.1;
 
-P_init=U*R*U'+s*(eye(d)-U*U'); % this is the common initial P
+
+R=RR;
+s=1*0.1;
+
+P_init=U*R*U' + s*eye(d);  %+s*(eye(d)-0*U*U'); % this is the common initial P
 
 #initial error
 eX=randn(d);
@@ -75,9 +91,9 @@ eX=randn(d);
 % KF
 P_KF=P_init;
 
-%PPCA KF
+%PPCA KF (! watch out !)
 U_sI=UU;
-R_sI=RR;
+R_sI=RR+s*eye(r);
 P_sI=P_init;
 
 %LR KF
@@ -106,11 +122,11 @@ eX_FA=eX;
 ########## Compute Kalman
 tt=zeros(4,N);
 ee=zeros(4,N);
-for i=0:N-1
+for i=1:N-1
   TT(i+1)=dt*i;
 
 # Change Matrix C
-if mod(i*dt,1)==0 && Cvariable!=0;
+if mod(i*dt,5)==0 && Cvariable!=0;
   '---regenerate Matrix C -----'
   i
   C=zeros(1,d);
@@ -126,7 +142,7 @@ if mod(i*dt,1)==0 && Cvariable!=0;
     # nb neighbors between 1 and 3
     nbAg=randi(3);
     for j=1:nbAg;
-      # index of neigbor 
+      # index of neigbor
       k=randi(Na);
       if k!=m;
         b=zeros(1,d);
@@ -142,7 +158,9 @@ if mod(i*dt,1)==0 && Cvariable!=0;
   end
   C;
 endif
-  
+
+
+
 % Full KF
 S=C'*inv(NN)*C;
 P_KF=Riccati_full(P_KF,dt,A,C,Q,NN);
@@ -168,7 +186,7 @@ eX_LR=eX_LR+dX_LR*dt;
 ##eX_FA=eX_FA+dX_FA*dt;
 ##norm(P_KF-P_FA2)/norm(P_KF); # (the two versions must give the same error)
 
-# Validation of FA KF with successive projection 
+# Validation of FA KF with successive projection
 G1=SQ;
 phi1=diag(proj_diagFA(G1,U_FA));
 U1= (eye(d)-U_FA*U_FA')*(G1*G1'-phi1)*U_FA*inv(R_FA);
@@ -185,7 +203,7 @@ U_FA=retraction_qr(U_FA,dU,dt);
 R_FA=R_FA+dt*(D1+D2);
 R_FA=(R_FA+R_FA')/2;
 P_FA=U_FA*R_FA*U_FA'+psi_FA;
-dX_FA=(A-P_FA2*S)*eX_FA;
+dX_FA=(A-P_FA*S)*eX_FA;
 eX_FA=eX_FA+dX_FA*dt;
 norm(P_KF-P_FA)/norm(P_KF); #(the two versions must give the same error)
 
@@ -193,10 +211,16 @@ tt(1,i+1)= norm(P_KF-P_LR)/norm(P_KF);
 tt(2,i+1)= norm(P_KF-P_sI)/norm(P_KF);
 tt(3,i+1)= norm(P_KF-P_FA)/norm(P_KF);
 
-ee(1,i+1)= norm(eX_LR);
-ee(2,i+1)= norm(eX_sI);
-ee(3,i+1)= norm(eX_FA);
-ee(4,i+1)= norm(eX_KF);
+#ee(1,i+1)= norm(eX_LR);
+#ee(2,i+1)= norm(eX_sI);
+#ee(3,i+1)= norm(eX_FA);
+#ee(4,i+1)= norm(eX_KF);
+
+ee(1,i+1)= norm(eX_KF-eX_LR);
+ee(2,i+1)= norm(eX_KF-eX_sI);
+ee(3,i+1)= norm(eX_KF-eX_FA);
+ee(4,i+1)= norm(eX_KF-eX_KF);
+
 
 
 end
@@ -215,7 +239,7 @@ ylabel ("error on P");
 title('||P-proj(P)|| / ||P||','fontsize',20)
 %h=get(gcf, "currentaxes");
 %set(h, "fontsize", fontsize, "linewidth", linewidth);
-print "-S200,200" -dpdf -color cov_XP3.pdf 
+print "-S200,200" -dpdf -color cov_XP3.pdf
 
 figure(2)
 plot(TT(1,:),ee(1,:),'-.',"linewidth",linewidth,TT(1,:),ee(2,:),"linewidth",linewidth,TT(1,:),ee(3,:),"linewidth",linewidth,TT(1,:),ee(4,:),"linewidth",linewidth)
@@ -225,5 +249,5 @@ ylabel ("error on X");
 legend('Low-rank','PPCA','FA','KF','Location','southwest')
 %h=get(gcf, "currentaxes");
 %set(h, "fontsize", fontsize, "linewidth", linewidth);
-title('||E[X]||')
-print "-S200,200" -dpdf -color err_XP3.pdf 
+title('||dX||')
+print "-S200,200" -dpdf -color err_XP3.pdf
