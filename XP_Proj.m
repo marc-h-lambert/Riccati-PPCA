@@ -26,7 +26,10 @@ U0=eye(d)(:,1:r); # a stiefel matrix corresponding to the first r canonical vect
 #O=randn(d,r);
 #U0=orth(O);      
 R0=2*diag(1:r); # a diagonal low rank matrix
-barpsi0=ones(d,1);
+
+### ML initialize  H0=GG'+Diag(0) such that all methods start from the same local point ###
+### If Diag term is not null, not clear how to estimate the local point for LR and PPCA ??
+barpsi0=zeros(d,1);
 %Psi0=diag(barpsi0);
 s0=sum(barpsi0)/d;
 
