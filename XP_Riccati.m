@@ -13,34 +13,62 @@ addpath Toolbox;
 
 # Can change d or r or Cvariable or SQ
 # The run is senstive to how SQ and U are generared
-# Cvariable=0: 1D problem with fixed C
-# Cvariable=1: 2D problem with variable C
 
-d=150;
-r=10;
 
-%Simulation du système
+d=100;
+r=15;
+
+%Simulation of the system
 
 dt=0.01;
 Tf=10;
 N=Tf/dt;
 
-% Tout le KF peut être fait hors ligne (à moins qu'on modifie le graphe en fonction des distances).
 
 ########## Model of the system
-Cvariable=0;
+
 A=zeros(d,d);
 
-#if Cvariable ==0;
-  # Observation matrix the same at each t
-  C=zeros(d,d);
-  for i=1:d-1;
-    C(i,i+1)=1;
+  C=zeros(1,d);
+  C(1,d)=1;
+  k=randi(d-1);
+  b=zeros(1,d);
+  b(1,d)=1;
+  b(1,k)=-1;
+  C=[b; C];
+  Na=int8(d/2);
+  # for each agents
+  for m=1:Na-1;
+    # nb neighbors seen =1
+    nbAg=randi(1);
+    for j=1:nbAg;
+      # index of neigbor
+      k=randi(Na-1);
+      if k!=m;
+        b=zeros(1,d);
+        b(1,2*(m-1)+1)=-1;
+        b(1,2*(k-1)+1)=1;
+        C=[b; C];
+        b=zeros(1,d);
+        b(1,2*(m-1)+2)=-1;
+        b(1,2*(k-1)+2)=1;
+        C=[b; C];
+      endif
+    end
   end
-  C=-eye(d)+C;
-  C(d,d)=1;
-  C;
-#endif
+   b=zeros(1,d);
+        b(1,2)=1;
+          C=[b; C];
+            b=zeros(1,d);
+        b(1,1)=1;
+        C=[b; C]; %Queen equipped with a GPS measuring its position
+
+
+
+
+
+
+
 
 dq=zeros(d,1);
 for u=1:d;
@@ -80,7 +108,7 @@ RR=2*eye(r); %initial parameters for all filters
 
 
 R=RR;
-s=1*0.1;
+s=0*1*0.1;
 
 P_init=U*R*U' + s*eye(d);  %+s*(eye(d)-0*U*U'); % this is the common initial P
 
@@ -124,41 +152,6 @@ tt=zeros(4,N);
 ee=zeros(4,N);
 for i=1:N-1
   TT(i+1)=dt*i;
-
-# Change Matrix C
-if mod(i*dt,5)==0 && Cvariable!=0;
-  '---regenerate Matrix C -----'
-  i
-  C=zeros(1,d);
-  C(1,d)=1;
-  k=randi(d-1)
-  b=zeros(1,d);
-  b(1,d)=1;
-  b(1,k)=-1;
-  C=[b; C];
-  Na=int8(d/2);
-  # for each agents
-  for m=1:Na-1;
-    # nb neighbors between 1 and 3
-    nbAg=randi(3);
-    for j=1:nbAg;
-      # index of neigbor
-      k=randi(Na);
-      if k!=m;
-        b=zeros(1,d);
-        b(1,2*(m-1)+1)=-1;
-        b(1,2*(k-1)+1)=1;
-        C=[b; C];
-        b=zeros(1,d);
-        b(1,2*(m-1)+2)=-1;
-        b(1,2*(k-1)+2)=1;
-        C=[b; C];
-      endif
-    end
-  end
-  C;
-endif
-
 
 
 % Full KF
@@ -233,21 +226,21 @@ linewidth=2;
 fontsize=30;
 plot(TT(1,:),tt(1,:),'-.',"linewidth",linewidth,TT(1,:),tt(2,:),"linewidth",linewidth,TT(1,:),tt(3,:),"linewidth",linewidth)
 axis([0 Tf 0 1]);
-legend('Low-rank','PPCA','FA','Location','northwest');
+legend('Low-rank','PPCA','FA','Location','north');
 xlabel ("time (s)");
 ylabel ("error on P");
 title('||P-proj(P)|| / ||P||','fontsize',20)
-%h=get(gcf, "currentaxes");
-%set(h, "fontsize", fontsize, "linewidth", linewidth);
-print "-S200,200" -dpdf -color cov_XP3.pdf
+h=get(gcf, "currentaxes");
+set(h, "fontsize", fontsize, "linewidth", linewidth);
+print "-S200,200" -dpdf -color cov_XP2.pdf
 
 figure(2)
 plot(TT(1,:),ee(1,:),'-.',"linewidth",linewidth,TT(1,:),ee(2,:),"linewidth",linewidth,TT(1,:),ee(3,:),"linewidth",linewidth,TT(1,:),ee(4,:),"linewidth",linewidth)
 axis([0 Tf 0 max(max(ee))+2]);
 xlabel ("time (s)");
-ylabel ("error on X");
-legend('Low-rank','PPCA','FA','KF','Location','southwest')
-%h=get(gcf, "currentaxes");
-%set(h, "fontsize", fontsize, "linewidth", linewidth);
-title('||dX||')
-print "-S200,200" -dpdf -color err_XP3.pdf
+ylabel ("error on X w.r.t. Full KF");
+legend('Low-rank','PPCA','FA','KF','Location','northwest')
+h=get(gcf, "currentaxes");
+set(h, "fontsize", fontsize, "linewidth", linewidth);
+title('||X-X_{KF}||')
+print "-S200,200" -dpdf -color err_XP2.pdf
