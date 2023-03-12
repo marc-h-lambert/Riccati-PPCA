@@ -39,8 +39,8 @@ t0=cputime;
 [U,R,cost]  = proj_lowRank(G,U0,R0);
 t=cputime;
 timeElapse=(t-t0)*1000
-error=sqrt(cost);#1-cost/trace(QQ*QQ);
-fprintf('cost low-rank (normalized) = %i\n', error)
+#error=sqrt(cost);#1-cost/trace(QQ*QQ);
+#fprintf('cost low-rank (normalized) = %i\n', error)
 
 ##
 ######## Project PPCA #################
@@ -49,8 +49,8 @@ t0=cputime;
 [U,R,s,cost]  = proj_ppca(G,U0,R0,s0);
 t=cputime;
 timeElapse=(t-t0)*1000
-error=sqrt(cost)#1-cost/trace(QQ*QQ);
-fprintf('cost ppca (normalized) = %i\n', error)
+#error=sqrt(cost)#1-cost/trace(QQ*QQ);
+#fprintf('cost ppca (normalized) = %i\n', error)
 
 # Comparison with older method for Validation:
 ##t0=cputime;
@@ -70,8 +70,8 @@ t0=cputime;
 [U,R,barpsi,cost]=proj_fa(G,U0,R0,barpsi0);
 t=cputime;
 timeElapse=(t-t0)*1000
-error=sqrt(cost)#1-cost/trace(QQ*QQ);
-fprintf('cost fa (normalized) = %i\n', error)
+#error=sqrt(cost)#1-cost/trace(QQ*QQ);
+#fprintf('cost fa (normalized) = %i\n', error)
 
 # Comparison with older method for Validation:
 ##t0=cputime;
