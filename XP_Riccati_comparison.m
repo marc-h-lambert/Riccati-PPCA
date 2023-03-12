@@ -211,7 +211,7 @@ set(h, "fontsize", fontsize, "linewidth", linewidth);
 title('||X-X_{KF}||')
 print "-S200,200" -dpdf -color err_XP2.pdf
 
-##################### XP with p=8 ################################
+##################### XP with latent dim 8 ################################
 
 yl=max(max(ee))+2;
 r=8;
