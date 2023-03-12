@@ -75,40 +75,13 @@ if  Cvariable!=0; %matrix in 2D
         C=[b; C]; %make queen visible
 endif
 
-
-
-
-
-
-
-dq=zeros(d,1);
-for u=1:d;
-  dq(u)=0.1+1*abs(rand);
-endfor
-dq=dq;
-#dq=randn(d,1);
-#SQ=diag(1:d)/d;
-#SQ=0.1*diag(rand(d));
-Q=10*0.2*diag(dq);
-#SQ=eye(d);
-#Q=0.1*SQ*SQ'; %process noise
-SQ=chol(Q);
 dq=zeros(d,1);
 for u=1:d;
   dq(u)=0.1+1*abs(randn);
 endfor
-dq=dq;
-NN=2*diag(dq);
-
-Q=100*0.01*diag(dq);
-#SQ=eye(d);
-#Q=0.1*SQ*SQ'; %process noise
+Q=diag(dq);
 SQ=chol(Q);
 NN=10*0.2; %obs noise
-
-
-
-
 
 ########## Compute Pinit
 TT=zeros(1,N);
@@ -116,8 +89,6 @@ O=randn(d,r);
 UU=orth(O);
 U=UU;%;eye(d)(:,1:r); % the goal is to generate a stiefel random matrix to avoid alignment with the diagonal which would favor our methods
 RR=2*eye(r); %initial parameters for all filters
-
-
 R=RR;
 s=0*1*0.1;
 
@@ -250,11 +221,6 @@ tt(1,i+1)= norm(P_KF-P_LR)/norm(P_KF);
 tt(2,i+1)= norm(P_KF-P_sI)/norm(P_KF);
 tt(3,i+1)= norm(P_KF-P_FA)/norm(P_KF);
 
-#ee(1,i+1)= norm(eX_LR);
-#ee(2,i+1)= norm(eX_sI);
-#ee(3,i+1)= norm(eX_FA);
-#ee(4,i+1)= norm(eX_KF);
-
 ee(1,i+1)= norm(eX_KF-eX_LR);
 ee(2,i+1)= norm(eX_KF-eX_sI);
 ee(3,i+1)= norm(eX_KF-eX_FA);
@@ -302,17 +268,13 @@ O=randn(d,r);
 UU=orth(O);
 U=UU;%;eye(d)(:,1:r); % the goal is to generate a stiefel random matrix to avoid alignment with the diagonal which would favor our methods
 RR=2*eye(r); %initial parameters for all filters
-
-
 R=RR;
 s=0*1*0.1;
-
 
 P_init=U*R*U' + s*eye(d);  %+s*(eye(d)-0*U*U'); % this is the common initial P
 
 #initial error
 eX=eXX;
-
 
 %initialisations
 % KF
@@ -334,7 +296,6 @@ R_FA=RR;
 psi_FA=s*eye(d);
 P_FA=P_init;
 
-
 %FA KF v2
 U_FA2=UU;
 R_FA2=RR;
@@ -351,8 +312,6 @@ tt=zeros(4,N);
 ee=zeros(4,N);
 for i=1:N-1
   TT(i+1)=dt*i;
-
-
 
 % Full KF
 S=C'*inv(NN)*C;
@@ -404,17 +363,10 @@ tt(1,i+1)= norm(P_KF-P_LR)/norm(P_KF);
 tt(2,i+1)= norm(P_KF-P_sI)/norm(P_KF);
 tt(3,i+1)= norm(P_KF-P_FA)/norm(P_KF);
 
-#ee(1,i+1)= norm(eX_LR);
-#ee(2,i+1)= norm(eX_sI);
-#ee(3,i+1)= norm(eX_FA);
-#ee(4,i+1)= norm(eX_KF);
-
 ee(1,i+1)= norm(eX_KF-eX_LR);
 ee(2,i+1)= norm(eX_KF-eX_sI);
 ee(3,i+1)= norm(eX_KF-eX_FA);
 ee(4,i+1)= norm(eX_KF-eX_KF);
-
-
 
 end
 
@@ -444,5 +396,3 @@ h=get(gcf, "currentaxes");
 set(h, "fontsize", fontsize, "linewidth", linewidth);
 title('||X-X_{KF}||')
 print "-S200,200" -dpdf -color err_XP1.pdf
-
-
