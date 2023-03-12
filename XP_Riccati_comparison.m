@@ -8,110 +8,68 @@
 addpath Toolbox;
 
 '----------- Diagonal + low rank : Test of Riccati flow ------------'
-## We integrate the Riccati SDE of the error and the covariance for a simple system
-# with A=0 and P0=URU'+s(I-UU')
-
-# Can change d or r or Cvariable or SQ
-# The run is senstive to how SQ and U are generared
-# Cvariable=0: 1D problem with fixed C
-# Cvariable=1: 2D problem with variable C
+##################### XP with latent dim 50 ################################
 
 d=200;
 r=50;
 
-%Simulation du système
 
 dt=0.01;
 Tf=10;
 N=Tf/dt;
 
-% Tout le KF peut être fait hors ligne (à moins qu'on modifie le graphe en fonction des distances).
+% The KF can be done off line if the graph is not changed
 
 ########## Model of the system
-Cvariable=1;
+
+# No dynamic
 A=zeros(d,d);
 
-if Cvariable ==0;
-  # Observation matrix the same at each t and in 1D
-  C=zeros(d,d);
-  for i=1:d-1;
-    C(i,i+1)=1;
+# Generate the observation matrix (supposed fixed)
+C=zeros(1,d);
+C(1,d)=1;
+k=randi(d-1);
+b=zeros(1,d);
+b(1,d)=1;
+b(1,k)=-1;
+C=[b; C];
+Na=int8(d/2);
+# for each agents
+for m=1:Na-1;
+  # nb neighbors seen =1
+  nbAg=randi(1);
+  for j=1:nbAg;
+    # index of neigbor
+    k=randi(Na-1);
+    if k!=m;
+      b=zeros(1,d);
+      b(1,2*(m-1)+1)=-1;
+      b(1,2*(k-1)+1)=1;
+      C=[b; C];
+      b=zeros(1,d);
+      b(1,2*(m-1)+2)=-1;
+      b(1,2*(k-1)+2)=1;
+      C=[b; C];
+    endif
   end
-  C=-eye(d)+C;
-  C(d,d)=1;
-  C;
-endif
-
-if  Cvariable!=0; %matrix in 2D
-  C=zeros(1,d);
-  C(1,d)=1;
-  k=randi(d-1);
-  b=zeros(1,d);
-  b(1,d)=1;
-  b(1,k)=-1;
-  C=[b; C];
-  Na=int8(d/2);
-  # for each agents
-  for m=1:Na-1;
-    # nb neighbors seen =1
-    nbAg=randi(1);
-    for j=1:nbAg;
-      # index of neigbor
-      k=randi(Na-1);
-      if k!=m;
-        b=zeros(1,d);
-        b(1,2*(m-1)+1)=-1;
-        b(1,2*(k-1)+1)=1;
+end
+ b=zeros(1,d);
+      b(1,2)=1;
         C=[b; C];
-        b=zeros(1,d);
-        b(1,2*(m-1)+2)=-1;
-        b(1,2*(k-1)+2)=1;
-        C=[b; C];
-      endif
-    end
-  end
-   b=zeros(1,d);
-        b(1,2)=1;
-          C=[b; C];
-            b=zeros(1,d);
-        b(1,1)=1;
-        C=[b; C]; %make queen visible
-endif
+          b=zeros(1,d);
+      b(1,1)=1;
+      C=[b; C]; %make queen visible
 
 
-
-
-
-
-
-dq=zeros(d,1);
-for u=1:d;
-  dq(u)=0.1+1*abs(rand);
-endfor
-dq=dq;
-#dq=randn(d,1);
-#SQ=diag(1:d)/d;
-#SQ=0.1*diag(rand(d));
-Q=10*0.2*diag(dq);
-#SQ=eye(d);
-#Q=0.1*SQ*SQ'; %process noise
-SQ=chol(Q);
+# process noise
 dq=zeros(d,1);
 for u=1:d;
   dq(u)=0.1+1*abs(randn);
 endfor
-dq=dq;
 NN=2*diag(dq);
-
 Q=100*0.01*diag(dq);
-#SQ=eye(d);
-#Q=0.1*SQ*SQ'; %process noise
 SQ=chol(Q);
 NN=10*0.2; %obs noise
-
-
-
-
 
 ########## Compute Pinit
 TT=zeros(1,N);
@@ -124,7 +82,7 @@ RR=2*eye(r); %initial parameters for all filters
 R=RR;
 s=0*1*0.1;
 
-P_init=U*R*U' + s*eye(d);  %+s*(eye(d)-0*U*U'); % this is the common initial P
+P_init=U*R*U' + s*eye(d); % this is the common initial P
 
 #initial error
 eX=randn(d);
@@ -133,7 +91,7 @@ eXX=eX;
 % KF
 P_KF=P_init;
 
-%PPCA KF (! watch out !)
+%PPCA KF
 U_sI=UU;
 R_sI=RR+s*eye(r);
 P_sI=P_init;
@@ -148,7 +106,6 @@ U_FA=UU;
 R_FA=RR;
 psi_FA=s*eye(d);
 P_FA=P_init;
-
 
 %FA KF v2
 U_FA2=UU;
@@ -166,42 +123,6 @@ tt=zeros(4,N);
 ee=zeros(4,N);
 for i=1:N-1
   TT(i+1)=dt*i;
-
-# Change Matrix C to test a changing graph
-if mod(i*dt,12)==0 && Cvariable!=0;
-  '---regenerate Matrix C -----'
-  i
-  C=zeros(1,d);
-  C(1,d)=1;
-  k=randi(d-1)
-  b=zeros(1,d);
-  b(1,d)=1;
-  b(1,k)=-1;
-  C=[b; C];
-  Na=int8(d/2);
-  # for each agents
-  for m=1:Na-1;
-    # nb neighbors seen =1
-    nbAg=randi(1);
-    for j=1:nbAg;
-      # index of neigbor
-      k=randi(Na-1);
-      if k!=m;
-        b=zeros(1,d);
-        b(1,2*(m-1)+1)=-1;
-        b(1,2*(k-1)+1)=1;
-        C=[b; C];
-        b=zeros(1,d);
-        b(1,2*(m-1)+2)=-1;
-        b(1,2*(k-1)+2)=1;
-        C=[b; C];
-      endif
-    end
-  end
-  C;
-endif
-
-
 
 % Full KF
 S=C'*inv(NN)*C;
@@ -253,10 +174,6 @@ tt(1,i+1)= norm(P_KF-P_LR)/norm(P_KF);
 tt(2,i+1)= norm(P_KF-P_sI)/norm(P_KF);
 tt(3,i+1)= norm(P_KF-P_FA)/norm(P_KF);
 
-#ee(1,i+1)= norm(eX_LR);
-#ee(2,i+1)= norm(eX_sI);
-#ee(3,i+1)= norm(eX_FA);
-#ee(4,i+1)= norm(eX_KF);
 
 ee(1,i+1)= norm(eX_KF-eX_LR);
 ee(2,i+1)= norm(eX_KF-eX_sI);
@@ -294,26 +211,10 @@ set(h, "fontsize", fontsize, "linewidth", linewidth);
 title('||X-X_{KF}||')
 print "-S200,200" -dpdf -color err_XP2.pdf
 
+##################### XP with p=8 ################################
 
 yl=max(max(ee))+2;
-
-
-
-
-
-
-
 r=8;
-
-
-%Simulation du système
-
-
-% Tout le KF peut être fait hors ligne (à moins qu'on modifie le graphe en fonction des distances).
-
-
-
-
 
 ########## Compute Pinit
 TT=zeros(1,N);
@@ -371,8 +272,6 @@ ee=zeros(4,N);
 for i=1:N-1
   TT(i+1)=dt*i;
 
-
-
 % Full KF
 S=C'*inv(NN)*C;
 P_KF=Riccati_full(P_KF,dt,A,C,Q,NN);
@@ -423,11 +322,6 @@ tt(1,i+1)= norm(P_KF-P_LR)/norm(P_KF);
 tt(2,i+1)= norm(P_KF-P_sI)/norm(P_KF);
 tt(3,i+1)= norm(P_KF-P_FA)/norm(P_KF);
 
-#ee(1,i+1)= norm(eX_LR);
-#ee(2,i+1)= norm(eX_sI);
-#ee(3,i+1)= norm(eX_FA);
-#ee(4,i+1)= norm(eX_KF);
-
 ee(1,i+1)= norm(eX_KF-eX_LR);
 ee(2,i+1)= norm(eX_KF-eX_sI);
 ee(3,i+1)= norm(eX_KF-eX_FA);
@@ -440,7 +334,7 @@ end
 'psi_FA'
 det(psi_FA)
 
-figure(1),clf
+figure(3),clf
 linewidth=2;
 fontsize=30;
 plot(TT(1,:),tt(1,:),'-.',"linewidth",linewidth,TT(1,:),tt(2,:),"linewidth",linewidth,TT(1,:),tt(3,:),"linewidth",linewidth)
@@ -453,9 +347,9 @@ h=get(gcf, "currentaxes");
 set(h, "fontsize", fontsize, "linewidth", linewidth);
 print "-S200,200" -dpdf -color cov_XP1.pdf
 
-figure(2)
+figure(4)
 plot(TT(1,:),ee(1,:),'-.',"linewidth",linewidth,TT(1,:),ee(2,:),"linewidth",linewidth,TT(1,:),ee(3,:),"linewidth",linewidth)
-axis([0 Tf 0 yl);
+axis([0 Tf 0 yl]);
 xlabel ("time (s)");
 ylabel ("error on X w.r.t. Full KF");
 legend('Low-rank','PPCA','FA','Location','northwest')
