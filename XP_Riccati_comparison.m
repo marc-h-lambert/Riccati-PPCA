@@ -16,16 +16,13 @@ addpath Toolbox;
 # Cvariable=0: 1D problem with fixed C
 # Cvariable=1: 2D problem with variable C
 
+'--------- XP with latent dimension 50 ------------'
 d=200;
 r=50;
-
-%Simulation du système
 
 dt=0.01;
 Tf=10;
 N=Tf/dt;
-
-% Tout le KF peut être fait hors ligne (à moins qu'on modifie le graphe en fonction des distances).
 
 ########## Model of the system
 Cvariable=1;
@@ -295,25 +292,9 @@ title('||X-X_{KF}||')
 print "-S200,200" -dpdf -color err_XP2.pdf
 
 
+'--------- XP with latent dimension 8 ------------'
 yl=max(max(ee))+2;
-
-
-
-
-
-
-
 r=8;
-
-
-%Simulation du système
-
-
-% Tout le KF peut être fait hors ligne (à moins qu'on modifie le graphe en fonction des distances).
-
-
-
-
 
 ########## Compute Pinit
 TT=zeros(1,N);
@@ -440,7 +421,7 @@ end
 'psi_FA'
 det(psi_FA)
 
-figure(1),clf
+figure(3),clf
 linewidth=2;
 fontsize=30;
 plot(TT(1,:),tt(1,:),'-.',"linewidth",linewidth,TT(1,:),tt(2,:),"linewidth",linewidth,TT(1,:),tt(3,:),"linewidth",linewidth)
@@ -453,7 +434,7 @@ h=get(gcf, "currentaxes");
 set(h, "fontsize", fontsize, "linewidth", linewidth);
 print "-S200,200" -dpdf -color cov_XP1.pdf
 
-figure(2)
+figure(4)
 plot(TT(1,:),ee(1,:),'-.',"linewidth",linewidth,TT(1,:),ee(2,:),"linewidth",linewidth,TT(1,:),ee(3,:),"linewidth",linewidth)
 axis([0 Tf 0 yl);
 xlabel ("time (s)");
