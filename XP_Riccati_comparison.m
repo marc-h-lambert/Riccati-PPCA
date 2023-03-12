@@ -388,7 +388,7 @@ print "-S200,200" -dpdf -color cov_XP1.pdf
 
 figure(4)
 plot(TT(1,:),ee(1,:),'-.',"linewidth",linewidth,TT(1,:),ee(2,:),"linewidth",linewidth,TT(1,:),ee(3,:),"linewidth",linewidth)
-axis([0 Tf 0 yl);
+axis([0 Tf 0 yl]);
 xlabel ("time (s)");
 ylabel ("error on X w.r.t. Full KF");
 legend('Low-rank','PPCA','FA','Location','northwest')
