@@ -15,7 +15,7 @@
 # C obs matrix m x d
 # N obs noise matrix m x m
  
-function [U,R,s] = Riccati_ppca(U,R,s,dt,sqrtA,C,diagQ,N);
+function [U,R,s] = Riccati_ppca_fast(U,R,s,dt,sqrtA,C,diagQ,N);
   [d,p]=size(U);
   
   invN=inv(N);
