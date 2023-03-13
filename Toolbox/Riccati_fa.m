@@ -12,6 +12,7 @@ function [U,R,Psi] = Riccati_fa(U,R,Psi,dt,A,C,Q,N);
   S=C'*inv(N)*C;
   M1=A*Psi+Psi*A'+Q-Psi*S*Psi;
   M2=R*U'*S*Psi*U;
+  M3=U'*A*U*R;
     
   #compute dPsi
   K=pinv(M.*M);
@@ -19,8 +20,8 @@ function [U,R,Psi] = Riccati_fa(U,R,Psi,dt,A,C,Q,N);
   dbarPsi=K*mhm;
   dPsi=diag(dbarPsi);
     
-  dU=M*(M1-dPsi)*U*inv(R)-M*Psi*S*U; # low-rank part
-  dR=U'*(M1-dPsi)*U-M2-M2'-R*U'*S*U*R;
+  dU=M*(M1-dPsi)*U*inv(R)+M*(A*U-Psi*S*U); 
+  dR=U'*(M1-dPsi)*U-M2-M2'-R*U'*S*U*R+M3+M3';
     
   # project on manifold
   U=retraction_qr(U,dU,dt);
