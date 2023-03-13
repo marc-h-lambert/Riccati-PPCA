@@ -13,7 +13,7 @@
 # C obs matrix m x d
 # N obs noise matrix m x m
  
-function [U,R] = Riccati_lowRank(U,R,dt,sqrtA,C,diagQ,N);
+function [U,R] = Riccati_lowRank_fast(U,R,dt,sqrtA,C,diagQ,N);
   [d,p]=size(U);
   invR=inv(R);
   K=sqrtA'*U;
