@@ -10,7 +10,7 @@ The observation matrix is of large dimension given from a Swarm drone example.
 
 - [XP_Proj][3]: Experiment on a single step projection in dimension one million.
 
-- [FactorAnalysis][4]: This directory contains the mains methods for FA-PPCA projection and FA-PPCA Riccati ODE. Riccati function are given in  two versions: a non memory-efficient variant easier to read for validation purpose and a fast memory-efficient variant. The low-rank and full methods are also given. 
+- [FactorAnalysis][4]: This directory contains the mains methods for FA and PPCA projection and FA and PPCA Riccati ODE. Riccati function are given in  two versions: a non memory-efficient variant easier to read for validation purpose and a fast memory-efficient variant. The low-rank and full methods are also given. 
 
 - [Toolbox][5]: This directory contains usefull function for fast linear lagebra on diagonal and square root matrix and also the retraction function.
 
