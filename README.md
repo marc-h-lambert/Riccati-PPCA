@@ -15,7 +15,7 @@ The observation matrix is of large dimension given from a Swarm drone example.
 - [Toolbox][5]: This directory contains usefull function for fast linear lagebra on diagonal and square root matrix and also the retraction function.
 
 [1]: ./XP_Riccati_main.m
-[2]: ./AdditionalXP/XP_Riccati_fast.m
-[3]: ./AdditionalXP/XP_Proj.m
+[2]: ./XP_Riccati_fast.m
+[3]: ./XP_Proj.m
 [4]: ./FactorAnalysis 
 [5]: ./Toolbox
