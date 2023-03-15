@@ -4,7 +4,7 @@ Companion code for the article "Low-rank plus diagonal approximations for Riccat
 These programs compute the low-rank $URU^T$ and low rank + diagonal approximation $URU^T+\psi$ of a matrix $H$ supposed of the form $H=GG^T$. The PPCA approximation is when $\psi$ is of the form $s(\mathbb{I}-UU^T)$ with $s$ a scalar. The FA approximation is when the matrix $\psi$ is diagonal.
 
 - [XP_Riccati_main][1]: Run to reproduce the figures of the paper. Successive projections to track a time dependent covariance matrix $H=P_t$ given by the Ricatti equations. The sequence of projections are given by ODE on each of the factorization components : $U_t$, $R_t$ and optionally $\psi_t$. 
-May takes some time, the observation matrix is of large dimension here.
+The observation matrix is of large dimension given from a Swarm drone example.
 
 - [XP_Riccati_fast][1]: Experiment on a simpler exemple with an observation matrix with a limited number of rows.
 
