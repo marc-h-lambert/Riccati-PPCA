@@ -80,17 +80,17 @@ tt=zeros(3,N);
 ee=zeros(4,N);
 for i=1:N-1
   TT(i+1)=dt*i;
-  
+
   # Change Matrix C to test a changing graph
   if mod(i*dt,12)==0;
     disp('---regenerate Matrix C -----')
     C=Obsrervation_SwarmDrones(d);
   endif
-  
+
   if mod(i*dt,1)==0;
     fprintf('step-%i \n',i);
   endif
-  
+
   % Full KF
   if mod(i*dt,1)==0;
     disp('step Full KF')
@@ -99,7 +99,7 @@ for i=1:N-1
   P_KF=Riccati_full(P_KF,dt,sqrtA,C,dq,NN);
   dX_KF=(A-P_KF*S)*eX_KF;
   eX_KF=eX_KF+dX_KF*dt;
-  
+
   % Low_rank KF
   if mod(i*dt,1)==0;
     disp('step Riccati-LR')
@@ -108,7 +108,7 @@ for i=1:N-1
   P_LR=U_LR*R_LR*U_LR';
   dX_LR=(A-P_LR*S)*eX_LR;
   eX_LR=eX_LR+dX_LR*dt;
-  
+
   % PPCA KF
   if mod(i*dt,1)==0;
     disp('step Riccati-PPCA')
@@ -117,8 +117,8 @@ for i=1:N-1
   P_sI=U_sI*R_sI*U_sI'+s*(eye(d)-U_sI*U_sI');
   dX_sI=(A-P_sI*S)*eX_sI;
   eX_sI=eX_sI+dX_sI*dt;
-  
-  % FA KF 
+
+  % FA KF
   if mod(i*dt,1)==0;
     disp('step Riccati-FA')
   endif
@@ -126,11 +126,11 @@ for i=1:N-1
   P_FA=U_FA*R_FA*U_FA'+diag(dpsi_FA);
   dX_FA=(A-P_FA*S)*eX_FA;
   eX_FA=eX_FA+dX_FA*dt;
-  
+
   tt(1,i+1)= norm(P_KF-P_LR)/norm(P_KF);
   tt(2,i+1)= norm(P_KF-P_sI)/norm(P_KF);
   tt(3,i+1)= norm(P_KF-P_FA)/norm(P_KF);
-  
+
   ee(1,i+1)= norm(eX_KF-eX_LR);
   ee(2,i+1)= norm(eX_KF-eX_sI);
   ee(3,i+1)= norm(eX_KF-eX_FA);
@@ -163,6 +163,8 @@ title('||X-X_{KF}||')
 print "-S200,200" -dpdf -color err_XP2.pdf
 
 
+
+
 '--------- XP with dim 200 and latent dimension 50 ------------'
 yl=max(max(ee))+2;
 r=50;
@@ -183,7 +185,7 @@ P_init=U*R*U' + s*eye(d);  %+s*(eye(d)-0*U*U'); % this is the common initial P
 % KF
 P_KF=P_init;
 
-%PPCA KF (! watch out !)
+%PPCA KF (! watch out the initialization URU'+sI=U(R+sI)U'+s(I-UU')!)
 U_sI=UU;
 R_sI=RR+s*eye(r);
 P_sI=P_init;
@@ -196,7 +198,7 @@ P_LR=P_init;
 %FA KF
 U_FA=UU;
 R_FA=RR;
-psi_FA=s*eye(d);
+dpsi_FA=diag(s*eye(d));
 P_FA=P_init;
 
 #initial error
@@ -211,17 +213,17 @@ tt=zeros(3,N);
 ee=zeros(4,N);
 for i=1:N-1
   TT(i+1)=dt*i;
-  
+
   # Change Matrix C to test a changing graph
   if mod(i*dt,12)==0;
     disp('---regenerate Matrix C -----')
     C=Obsrervation_SwarmDrones(d);
   endif
-  
+
   if mod(i*dt,1)==0;
     fprintf('step-%i \n',i);
   endif
-  
+
   % Full KF
   if mod(i*dt,1)==0;
     disp('step Full KF')
@@ -230,7 +232,7 @@ for i=1:N-1
   P_KF=Riccati_full(P_KF,dt,sqrtA,C,dq,NN);
   dX_KF=(A-P_KF*S)*eX_KF;
   eX_KF=eX_KF+dX_KF*dt;
-  
+
   % Low_rank KF
   if mod(i*dt,1)==0;
     disp('step Riccati-LR')
@@ -239,7 +241,7 @@ for i=1:N-1
   P_LR=U_LR*R_LR*U_LR';
   dX_LR=(A-P_LR*S)*eX_LR;
   eX_LR=eX_LR+dX_LR*dt;
-  
+
   % PPCA KF
   if mod(i*dt,1)==0;
     disp('step Riccati-PPCA')
@@ -248,8 +250,8 @@ for i=1:N-1
   P_sI=U_sI*R_sI*U_sI'+s*(eye(d)-U_sI*U_sI');
   dX_sI=(A-P_sI*S)*eX_sI;
   eX_sI=eX_sI+dX_sI*dt;
-  
-  % FA KF 
+
+  % FA KF
   if mod(i*dt,1)==0;
     disp('step Riccati-FA')
   endif
@@ -257,11 +259,11 @@ for i=1:N-1
   P_FA=U_FA*R_FA*U_FA'+diag(dpsi_FA);
   dX_FA=(A-P_FA*S)*eX_FA;
   eX_FA=eX_FA+dX_FA*dt;
-  
+
   tt(1,i+1)= norm(P_KF-P_LR)/norm(P_KF);
   tt(2,i+1)= norm(P_KF-P_sI)/norm(P_KF);
   tt(3,i+1)= norm(P_KF-P_FA)/norm(P_KF);
-  
+
   ee(1,i+1)= norm(eX_KF-eX_LR);
   ee(2,i+1)= norm(eX_KF-eX_sI);
   ee(3,i+1)= norm(eX_KF-eX_FA);
