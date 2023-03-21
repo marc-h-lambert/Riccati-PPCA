@@ -29,18 +29,7 @@ N=Tf/dt;
 ra=1;
 sqrtA=zeros(d,ra);
 A=sqrtA*sqrtA';
-%C=Observation_SwarmDrones(d);
-
-# Genertate a random observation matrix C of size m x d
-m=1;
-C=zeros(m,d);
-k=int8(d/10);
-for i=1:m;
-  Idx=randperm(d,k);
-  for j=1:k;
-    C(i,Idx)=1;
-  endfor
-endfor
+C=Observation_SwarmDrones(d);
 
 dq=zeros(d,1);
 for u=1:d;
