@@ -39,17 +39,14 @@ function [barphi] = solve_diagFA(diagM,U);
   
   % Normal equation solved with memory-cheap Woodbury formulas (if matrixes are invertibles)
     
-  %if r*(r+1)/2>d % we then need a moore penrose pseudo inverse
-  if false;
+  if r*(r+1)/2>d ; % we then need a moore penrose pseudo inverse
     % warning moore penrose pseudo inverse may make Kalman diverge
-    % ML: why not use fast inverse in this case  (work if r=50 / d=200) ??
     warning("r*r > d/2 - fast inverse not used");
     barphi=pinv(eye(d)-2*diag(diagD)+Upsilon*Upsilon')*diagM;
   else
     barpsi=1./(1-2*diagD);
     Z=eye(size(Upsilon)(2))+(Upsilon'.*barpsi')*Upsilon;
     barpsi2=barpsi.*diagM;
-    # warning : if we replace pinv by inv XP_proj in dim one million give singular value
     barpsi3=pinv(Z)*Upsilon'*barpsi2;
     barphi=barpsi2-barpsi.*(Upsilon*barpsi3);
   endif
