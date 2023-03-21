@@ -11,8 +11,7 @@ These programs compute the projections of a structured symmetric matrix $H$ onto
 
 - [Toolbox][4]: This directory contains usefull function for fast linear lagebra on diagonal and square root matrix and also the retraction function.
 
-[1]: ./XP_Riccati_main.m
-[2]: ./XP_Riccati_fast.m
-[3]: ./XP_Proj.m
-[4]: ./MatrixProjection 
-[5]: ./Toolbox
+[1]: ./XP_Proj.m
+[2]: ./XP_Riccati_main.m
+[3]: ./MatrixProjection 
+[4]: ./Toolbox
