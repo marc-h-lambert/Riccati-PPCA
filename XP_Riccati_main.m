@@ -5,8 +5,9 @@
 ###   Code supported by Silvere Bonnabel and Marc Lambert
 #############################################################################################
 
-addpath Toolbox;
-addpath FactorAnalysis;
+currentDir=fileparts(mfilename('fullpath'));
+addpath(fullfile(currentDir,'Toolbox'));
+addpath(fullfile(currentDir,'MatrixProjection'));
 
 disp('----------- Diagonal + low rank : Test of Riccati flow ------------')
 ## We integrate the Riccati SDE of the error and the covariance for a simple system
@@ -16,6 +17,10 @@ disp('--------- XP with dim 200 and latent dimension 8 ------------')
 d=200;
 r=8;
 
+% To check if r is too near d : inverse FA fail ???
+%d=5;
+%r=3;
+
 dt=0.01;
 Tf=10;
 N=Tf/dt;
@@ -24,7 +29,18 @@ N=Tf/dt;
 ra=1;
 sqrtA=zeros(d,ra);
 A=sqrtA*sqrtA';
-C=Observation_SwarmDrones(d);
+%C=Observation_SwarmDrones(d);
+
+# Genertate a random observation matrix C of size m x d
+m=1;
+C=zeros(m,d);
+k=int8(d/10);
+for i=1:m;
+  Idx=randperm(d,k);
+  for j=1:k;
+    C(i,Idx)=1;
+  endfor
+endfor
 
 dq=zeros(d,1);
 for u=1:d;
@@ -80,7 +96,6 @@ tt=zeros(3,N);
 ee=zeros(4,N);
 for i=1:N-1
   TT(i+1)=dt*i;
-
   # Change Matrix C to test a changing graph
   if mod(i*dt,12)==0;
     disp('---regenerate Matrix C -----')
@@ -104,7 +119,7 @@ for i=1:N-1
   if mod(i*dt,1)==0;
     disp('step Riccati-LR')
   endif
-  [U_LR,R_LR]=Riccati_lowRank_fast(U_LR,R_LR,dt,sqrtA,C,dq,NN);
+  [U_LR,R_LR]=Riccati_lowRank(U_LR,R_LR,dt,sqrtA,C,dq,NN);
   P_LR=U_LR*R_LR*U_LR';
   dX_LR=(A-P_LR*S)*eX_LR;
   eX_LR=eX_LR+dX_LR*dt;
@@ -113,7 +128,7 @@ for i=1:N-1
   if mod(i*dt,1)==0;
     disp('step Riccati-PPCA')
   endif
-  [U_sI,R_sI,s]=Riccati_ppca_fast(U_sI,R_sI,s,dt,sqrtA,C,dq,NN);
+  [U_sI,R_sI,s]=Riccati_ppca(U_sI,R_sI,s,dt,sqrtA,C,dq,NN);
   P_sI=U_sI*R_sI*U_sI'+s*(eye(d)-U_sI*U_sI');
   dX_sI=(A-P_sI*S)*eX_sI;
   eX_sI=eX_sI+dX_sI*dt;
@@ -122,13 +137,13 @@ for i=1:N-1
   if mod(i*dt,1)==0;
     disp('step Riccati-FA')
   endif
-  [U_FA,R_FA,dpsi_FA]=Riccati_fa_fast(U_FA,R_FA,dpsi_FA,dt,sqrtA,C,dq,NN);
+  [U_FA,R_FA,dpsi_FA]=Riccati_fa(U_FA,R_FA,dpsi_FA,dt,sqrtA,C,dq,NN);
   P_FA=U_FA*R_FA*U_FA'+diag(dpsi_FA);
   dX_FA=(A-P_FA*S)*eX_FA;
   eX_FA=eX_FA+dX_FA*dt;
 
   tt(1,i+1)= norm(P_KF-P_LR)/norm(P_KF);
-  tt(2,i+1)= norm(P_KF-P_sI)/norm(P_KF);
+  tt(2,i+1)= abs(norm(P_KF-P_sI)/norm(P_KF));
   tt(3,i+1)= norm(P_KF-P_FA)/norm(P_KF);
 
   ee(1,i+1)= norm(eX_KF-eX_LR);
@@ -163,9 +178,7 @@ title('||X-X_{KF}||')
 print "-S200,200" -dpdf -color err_XP2.pdf
 
 
-
-
-'--------- XP with dim 200 and latent dimension 50 ------------'
+disp('--------- XP with dim 200 and latent dimension 50 ------------')
 yl=max(max(ee))+2;
 r=50;
 
@@ -237,7 +250,7 @@ for i=1:N-1
   if mod(i*dt,1)==0;
     disp('step Riccati-LR')
   endif
-  [U_LR,R_LR]=Riccati_lowRank_fast(U_LR,R_LR,dt,sqrtA,C,dq,NN);
+  [U_LR,R_LR]=Riccati_lowRank(U_LR,R_LR,dt,sqrtA,C,dq,NN);
   P_LR=U_LR*R_LR*U_LR';
   dX_LR=(A-P_LR*S)*eX_LR;
   eX_LR=eX_LR+dX_LR*dt;
@@ -246,7 +259,7 @@ for i=1:N-1
   if mod(i*dt,1)==0;
     disp('step Riccati-PPCA')
   endif
-  [U_sI,R_sI,s]=Riccati_ppca_fast(U_sI,R_sI,s,dt,sqrtA,C,dq,NN);
+  [U_sI,R_sI,s]=Riccati_ppca(U_sI,R_sI,s,dt,sqrtA,C,dq,NN);
   P_sI=U_sI*R_sI*U_sI'+s*(eye(d)-U_sI*U_sI');
   dX_sI=(A-P_sI*S)*eX_sI;
   eX_sI=eX_sI+dX_sI*dt;
@@ -255,7 +268,7 @@ for i=1:N-1
   if mod(i*dt,1)==0;
     disp('step Riccati-FA')
   endif
-  [U_FA,R_FA,dpsi_FA]=Riccati_fa_fast(U_FA,R_FA,dpsi_FA,dt,sqrtA,C,dq,NN);
+  [U_FA,R_FA,dpsi_FA]=Riccati_fa(U_FA,R_FA,dpsi_FA,dt,sqrtA,C,dq,NN);
   P_FA=U_FA*R_FA*U_FA'+diag(dpsi_FA);
   dX_FA=(A-P_FA*S)*eX_FA;
   eX_FA=eX_FA+dX_FA*dt;

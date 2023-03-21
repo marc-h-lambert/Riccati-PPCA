@@ -5,8 +5,9 @@
 ###   Code supported by Silvere Bonnabel and Marc Lambert  
 #############################################################################################
 
-addpath MaToolbox;
-addpath FactorAnalysis;
+currentDir=fileparts(mfilename('fullpath'));
+addpath(fullfile(currentDir,'Toolbox'));
+addpath(fullfile(currentDir,'MatrixProjection'));
 
 disp('----------- Diagonal + low rank : Test of Projection ------------');
 ## We project a matrix H on the hyperplane of the LR/FA/PPCA manifold

@@ -5,8 +5,9 @@
 ###   Code supported by Silvere Bonnabel and Marc Lambert
 #############################################################################################
 
-addpath Toolbox;
-addpath FactorAnalysis;
+currentDir=fileparts(mfilename('fullpath'));
+addpath(fullfile(currentDir,'Toolbox'));
+addpath(fullfile(currentDir,'MatrixProjection'));
 
 disp('----------- Test of MEMORY EFFICIENT Riccati flow ------------')
 ## We integrate the Riccati SDE of the error and the covariance for a simple system
@@ -78,7 +79,7 @@ t0=cputime;
 
 for i=1:N-1
   TT(i+1)=dt*i;
-  [U_LR,R_LR]=Riccati_lowRank_fast(U_LR,R_LR,dt,sqrtA,C,dq,NN);
+  [U_LR,R_LR]=Riccati_lowRank(U_LR,R_LR,dt,sqrtA,C,dq,NN);
 end
 
 t=cputime;
@@ -91,7 +92,7 @@ t0=cputime;
 
 for i=1:N-1
   TT(i+1)=dt*i;
-  [U_sI,R_sI,s]=Riccati_ppca_fast(U_sI,R_sI,s,dt,sqrtA,C,dq,NN);
+  [U_sI,R_sI,s]=Riccati_ppca(U_sI,R_sI,s,dt,sqrtA,C,dq,NN);
 end
 
 t=cputime;
@@ -104,7 +105,7 @@ t0=cputime;
 
 for i=1:N-1
   TT(i+1)=dt*i;
-  [U_sI,R_sI,s]=Riccati_fa_fast(U_FA,R_FA,dpsi_FA,dt,sqrtA,C,dq,NN);
+  [U_sI,R_sI,s]=Riccati_fa(U_FA,R_FA,dpsi_FA,dt,sqrtA,C,dq,NN);
 end
 
 t=cputime;
