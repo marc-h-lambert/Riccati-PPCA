@@ -41,7 +41,7 @@ function [barphi] = solve_diagFA(diagM,U);
     
   if r*(r+1)/2>d ; % we then need a moore penrose pseudo inverse
     % warning moore penrose pseudo inverse may make Kalman diverge
-    warning("r*r > d/2 - fast inverse not used");
+    % warning("r*r > d/2 - fast inverse not used");
     barphi=pinv(eye(d)-2*diag(diagD)+Upsilon*Upsilon')*diagM;
   else
     barpsi=1./(1-2*diagD);
